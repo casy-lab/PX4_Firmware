@@ -1,6 +1,6 @@
 # PX4 Drone Autopilot
 ## Internal Model Based Regulator
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/positions.png" width = 80% height = 40% div align=center />
+<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/positions.png" width = 100% height = 20% div align=centre />
 
 
 
