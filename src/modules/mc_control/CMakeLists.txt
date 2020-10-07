@@ -32,8 +32,6 @@
 ############################################################################
 
 add_subdirectory(Takeoff)
-add_subdirectory(AttitudeControl)
-add_subdirectory(RateControl)
 add_subdirectory(IMBControl)
 
 px4_add_module(
@@ -44,7 +42,6 @@ px4_add_module(
 		-Wno-implicit-fallthrough # TODO: fix and remove
 	SRCS
 		mc_control_main.cpp
-		PositionControl.cpp
 		Utility/ControlMath.cpp
 	DEPENDS
 		controllib
@@ -57,8 +54,6 @@ px4_add_module(
 		circuit_breaker
 		conversion
 		mathlib
-		AttitudeControl
-		RateControl
 		IMBControl
 		px4_work_queue
 	)

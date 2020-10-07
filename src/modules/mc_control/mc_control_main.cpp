@@ -13,13 +13,11 @@ MulticopterControl::MulticopterControl() :
 	_vel_x_deriv(this, "VELD"),
 	_vel_y_deriv(this, "VELD"),
 	_vel_z_deriv(this, "VELD"),
-	_control(this),
 	_cycle_perf(perf_alloc_once(PC_ELAPSED, MODULE_NAME": cycle time")){
 
 	// Initialize Variables
 	att.q[0] = 1.f;
 
-	_rates_sp.zero();
 	_thrust_sp = 0.0f;
 	_att_control.zero();
 
@@ -60,7 +58,7 @@ void MulticopterControl::Run(){
 	
 	_freq.freq = dt;
 	_freq.timestamp = actualTime;
-	//_freq_pub.publish(_freq);
+	_freq_pub.publish(_freq);
 
 	//if (_vehicle_angular_velocity_sub.update(&angular_velocity)){
 		// Check Immediately Topics and Parameters Update
@@ -75,22 +73,6 @@ void MulticopterControl::Run(){
 
 		const bool was_in_failsafe = _in_failsafe;
 		_in_failsafe = false;
-
-		// Activate the weathervane controller if required.
-		// If activated a flighttask can use it to implement a yaw-rate control strategy that turns the nose of the vehicle into the wind
-		if (_wv_controller != nullptr) {
-			// In manual mode we just want to use weathervane if position is controlled as well
-			// In mission, enabling wv is done in flight task
-			if (_control_mode.flag_control_manual_enabled) {
-				if (_control_mode.flag_control_position_enabled && _wv_controller->weathervane_enabled()) {
-					_wv_controller->activate();
-
-				} else {
-					_wv_controller->deactivate();
-				}
-			}
-			_wv_controller->update(matrix::Quatf(_att_sp.q_d), _states.yaw);
-		}
 
 		// An update is necessary here because otherwise the takeoff state doesn't get skiped with non-altitude-controlled modes
 		_takeoff.updateTakeoffState(_control_mode.flag_armed, _vehicle_land_detected.landed, false, 10.f,
@@ -161,11 +143,6 @@ void MulticopterControl::Run(){
 				setpoint.yaw = _states.yaw;
 				setpoint.yawspeed = 0.f;
 
-				// Prevent any integrator windup
-				// TODO: Eliminate It
-				//_control.resetIntegralXY();
-				//_control.resetIntegralZ();
-
 				// Reactivate the task which will reset the setpoint to current state
 				_flight_tasks.reActivate();
 			}
@@ -179,76 +156,14 @@ void MulticopterControl::Run(){
 				limit_altitude(setpoint);
 			}
 
-			// Information For Attitude/Rate Controller
+			// Information For Controller
 			const Vector3f rates{angular_velocity.xyz};
 			const Matrix<float, 4, 1> quaternion{att.q};
-			_actuators.timestamp_sample = angular_velocity.timestamp_sample;
-
-			// Position Control // *************************** //
-			// Update states, setpoints and constraints.
-			//_control.updateConstraints(constraints);
-			//_control.updateState(_states);
-
-			// Update position controller setpoints
-			/*if (!_control.updateSetpoint(setpoint)) {
-				warn_rate_limited("Position-Control Setpoint-Update failed");
-				failsafe(setpoint, _states, true, !was_in_failsafe);
-				_control.updateSetpoint(setpoint);
-				constraints = FlightTask::empty_constraints;
-			}*/
-
-			// Generate desired thrust and yaw.
-			//_control.generateThrustYawSetpoint(_dt);
-			// Position Control // *************************** //
-
-			// Extract Info From Position Control
-			// Fill local position, velocity and thrust setpoint.
-			/*vehicle_local_position_setpoint_s local_pos_sp{};
-			local_pos_sp.timestamp = hrt_absolute_time();
-			local_pos_sp.x = setpoint.x;
-			local_pos_sp.y = setpoint.y;
-			local_pos_sp.z = setpoint.z;
-			local_pos_sp.yaw = _control.getYawSetpoint();
-			local_pos_sp.yawspeed = _control.getYawspeedSetpoint();
-			local_pos_sp.vx = PX4_ISFINITE(_control.getVelSp()(0)) ? _control.getVelSp()(0) : setpoint.vx;
-			local_pos_sp.vy = PX4_ISFINITE(_control.getVelSp()(1)) ? _control.getVelSp()(1) : setpoint.vy;
-			local_pos_sp.vz = PX4_ISFINITE(_control.getVelSp()(2)) ? _control.getVelSp()(2) : setpoint.vz;
-			_control.getThrustSetpoint().copyTo(local_pos_sp.thrust);*/
-
-			// Publish local position setpoint
-			// This message will be used by other modules (such as Landdetector) to determine vehicle intention.
-			//_local_pos_sp_pub.publish(local_pos_sp);
-
-			// Inform FlightTask about the input and output of the velocity controller
-			// This is used to properly initialize the velocity setpoint when onpening the position loop (position unlock)
-			//_flight_tasks.updateVelocityControllerIO(_control.getVelSp(), Vector3f(local_pos_sp.thrust));
-
-			// Part of landing logic: if ground-contact/maybe landed was detected, turn off
-			// controller. This message does not have to be logged as part of the vehicle_local_position_setpoint topic.
-			// Note: only adust thrust output if there was not thrust-setpoint demand in D-direction.
-			//if (_takeoff.getTakeoffState() > TakeoffState::rampup && !PX4_ISFINITE(setpoint.thrust[2])) {
-			//	limit_thrust_during_landing(local_pos_sp);
-			//}
-
-			// Extract Attitude SetPoints
-			//_att_sp = ControlMath::thrustToAttitude(matrix::Vector3f(local_pos_sp.thrust), local_pos_sp.yaw);
-			//_att_sp.yaw_sp_move_rate = _control.getYawspeedSetpoint();
-			//_att_sp.fw_control_yaw = false;
-			//_att_sp.apply_flaps = false;
-
-			// Attitude/Rate Control // *************************** //
-			// Run Attitude Control
-			//control_attitude();
-
-			// Run Rate Control
-			//control_attitude_rates(_dt, rates);
 
 			// IMB Control
 			// Fill State and SetPoint MSGS
 			matrix::Matrix<double, 12, 1> actualState;
 			matrix::Matrix<double, 3, 1> poseSetPoint;
-
-			//std::cout << quaternion(0,0) << " " << quaternion(1,0) << " " << quaternion(2,0) << " " << quaternion(3,0) << std::endl;
 
 			double phi = atan2(2*(quaternion(0,0)*quaternion(1,0) + quaternion(2,0)*quaternion(3,0)),
 									1 - 2*(pow(quaternion(1,0), 2) + pow(quaternion(2,0), 2)));
@@ -261,13 +176,22 @@ void MulticopterControl::Run(){
 			// States are Memorized As
     		// 0:x / 1:y / 2:z / 3:xDot / 4:yDot / 5:zDot
     		// 6:phi / 7:theta / 8:psi / 9:phiDot / 10:thetaDot / 11:psiDot
-			
-			actualState(0,0) = _local_pos.x; actualState(1,0) = _local_pos.y; actualState(2,0) = _local_pos.z;
-			actualState(3,0) = _local_pos.vx; actualState(4,0) = _local_pos.vy; actualState(5,0) = _local_pos.vz;
-			actualState(6,0) = phi; actualState(7,0) = theta; actualState(8,0) = psi;
-			actualState(9,0) = rates(0); actualState(10,0) = rates(1); actualState(11,0) = rates(2);
+			actualState(0,0) = _local_pos.x;
+			actualState(1,0) = _local_pos.y;
+			actualState(2,0) = _local_pos.z;
+			actualState(3,0) = _local_pos.vx;
+			actualState(4,0) = _local_pos.vy;
+			actualState(5,0) = _local_pos.vz;
+			actualState(6,0) = phi;
+			actualState(7,0) = theta;
+			actualState(8,0) = psi;
+			actualState(9,0) = rates(0);
+			actualState(10,0) = rates(1);
+			actualState(11,0) = rates(2);
 
-			poseSetPoint(0,0) = setpoint.x; poseSetPoint(1,0) = setpoint.y; poseSetPoint(2,0) = setpoint.z;
+			poseSetPoint(0,0) = setpoint.x;
+			poseSetPoint(1,0) = setpoint.y;
+			poseSetPoint(2,0) = setpoint.z;
 
 			// Publish Errors
 			_errors.ex = _local_pos.x - setpoint.x;
@@ -279,11 +203,12 @@ void MulticopterControl::Run(){
 			// Update Control
 			matrix::Matrix<double, 4, 1> controlAction = _IMBControl.update(actualState, poseSetPoint, dt);
 
-			//controlAction(0,0) /= 7;
-			//controlAction(1,0) /= 4;
-			//controlAction(2,0) /= 4;
-			controlAction(3,0) /= 27.15; //27.15;
+			// controlAction(0,0) /= 7;
+			// controlAction(1,0) /= 4;
+			// controlAction(2,0) /= 4;
+			controlAction(3,0) /= 27.15;
 
+			// Saturations
 			if(controlAction(0,0) > 0){
 				_att_control(0) = controlAction(0,0)>1 ? 1.0 : controlAction(0,0);
 			} else{
@@ -307,41 +232,11 @@ void MulticopterControl::Run(){
 			} else{
 				_thrust_sp = 0.0;
 			}
-
-			//std::cout << _att_control(0) << " " << _att_control(1) << " " << _att_control(2) << std::endl;
-			//std::cout << _thrust_sp << std::endl;
-			
 			
 			// Publish Actuator Controls
 			publish_actuator_controls();
-			//publish_rate_controller_status();
 
-			// Attitude/Rate Control // *************************** //
-
-			// If Termination is TRUE -> Stop Control and Set All Zero
-			if (_control_mode.flag_control_termination_enabled) {
-				if (!_vehicle_status.is_vtol) {
-					_rates_sp.zero();
-					_rate_control.resetIntegral();
-					_thrust_sp = 0.0f;
-					_att_control.zero();
-					publish_actuator_controls();
-				}
-			}
-
-			// Calculate loop update rate while disarmed or at least a few times (updating the filter is expensive)
-			// Actually this is not fundamental !!!
-			if (!_control_mode.flag_armed || (time_stamp_current - _task_start) < 3300000) {
-				_dt_accumulator += _dt;
-				++_loop_counter;
-				if (_dt_accumulator > 1.f) {
-					const float loop_update_rate = (float)_loop_counter / _dt_accumulator;
-					_loop_update_rate_hz = _loop_update_rate_hz * 0.5f + loop_update_rate * 0.5f;
-					_dt_accumulator = 0;
-					_loop_counter = 0;
-					//_rate_control.setDTermCutoff(_loop_update_rate_hz, _param_mc_dterm_cutoff.get(), true);
-				}
-
+			if (!_control_mode.flag_armed){
 				_IMBControl.reset();
 			}
 
@@ -357,22 +252,6 @@ void MulticopterControl::Run(){
 
 			_old_landing_gear_position = gear.landing_gear;
 
-		} else {
-			// No flighttask is active: set attitude setpoint to idle
-			_att_sp.roll_body = _att_sp.pitch_body = 0.0f;
-			_att_sp.yaw_body = _states.yaw;
-			_att_sp.yaw_sp_move_rate = 0.0f;
-			_att_sp.fw_control_yaw = false;
-			_att_sp.apply_flaps = false;
-			matrix::Quatf q_sp = matrix::Eulerf(_att_sp.roll_body, _att_sp.pitch_body, _att_sp.yaw_body);
-			q_sp.copyTo(_att_sp.q_d);
-			_att_sp.q_d_valid = true;
-			_att_sp.thrust_body[2] = 0.0f;
-
-			// Reset the numerical derivatives to not generate d term spikes when coming from non-position controlled operation
-			_vel_x_deriv.reset();
-			_vel_y_deriv.reset();
-			_vel_z_deriv.reset();
 		}
 
 	perf_end(_cycle_perf);
@@ -380,17 +259,6 @@ void MulticopterControl::Run(){
 // ************************************************************************************** //
 
 //////////////////////////////////////////////////////////////////////////// Helper Functions
-
-// Publish Warning at Lower Rate
-void MulticopterControl::warn_rate_limited(const char *string){
-	hrt_abstime now = hrt_absolute_time();
-
-	if (now - _last_warn > 200_ms) {
-		PX4_WARN("%s", string);
-		_last_warn = now;
-	}
-}
-// ************************************************************************************** //
 
 // Check for Parameters Update
 int MulticopterControl::parameters_update(bool force){
@@ -438,24 +306,6 @@ int MulticopterControl::parameters_update(bool force){
 		if (_wv_controller != nullptr) {
 			_wv_controller->update_parameters();
 		}
-
-		// Attitude/Rate Parameters
-		_attitude_control.setProportionalGain(Vector3f(_param_mc_roll_p.get(), _param_mc_pitch_p.get(), _param_mc_yaw_p.get()));
-
-		// Rate Control Parameters
-		// The controller gain K is used to convert the parallel (P + I/s + sD) form to the ideal (K * [1 + 1/sTi + sTd]) form
-		Vector3f rate_k = Vector3f(_param_mc_rollrate_k.get(), _param_mc_pitchrate_k.get(), _param_mc_yawrate_k.get());
-		
-		_rate_control.setGains(rate_k.emult(Vector3f(_param_mc_rollrate_p.get(), _param_mc_pitchrate_p.get(), _param_mc_yawrate_p.get())),
-							   rate_k.emult(Vector3f(_param_mc_rollrate_i.get(), _param_mc_pitchrate_i.get(), _param_mc_yawrate_i.get())),
-							   rate_k.emult(Vector3f(_param_mc_rollrate_d.get(), _param_mc_pitchrate_d.get(), _param_mc_yawrate_d.get())));
-		_rate_control.setIntegratorLimit(Vector3f(_param_mc_rr_int_lim.get(), _param_mc_pr_int_lim.get(), _param_mc_yr_int_lim.get()));
-		_rate_control.setDTermCutoff(_loop_update_rate_hz, _param_mc_dterm_cutoff.get(), false);
-		_rate_control.setFeedForwardGain(Vector3f(_param_mc_rollrate_ff.get(), _param_mc_pitchrate_ff.get(), _param_mc_yawrate_ff.get()));
-
-		// Angular Rate Limits
-		using math::radians;
-		_attitude_control.setRateLimit(Vector3f(radians(_param_mc_rollrate_max.get()), radians(_param_mc_pitchrate_max.get()), radians(_param_mc_yawrate_max.get())));
 
 		_actuators_0_circuit_breaker_enabled = circuit_breaker_enabled_by_val(_param_cbrk_rate_ctrl.get(), CBRK_RATE_CTRL_KEY);
 	}
@@ -778,24 +628,6 @@ void MulticopterControl::start_flight_task(){
 }
 // ************************************************************************************** //
 
-// Adjust the setpoint during landing.
-void MulticopterControl::limit_thrust_during_landing(vehicle_local_position_setpoint_s &setpoint){
-	if (_vehicle_land_detected.ground_contact
-	    || _vehicle_land_detected.maybe_landed) {
-		// We set thrust to zero, this will help to decide if we are actually landed or not
-		setpoint.thrust[0] = setpoint.thrust[1] = setpoint.thrust[2] = 0.0f;
-		// Set yaw-sp to current yaw to avoid any corrections
-		setpoint.yaw = _states.yaw;
-		setpoint.yawspeed = 0.f;
-
-		// Prevent any integrator windup
-		// TODO: Remove It!!!
-		_control.resetIntegralXY();
-		_control.resetIntegralZ();
-	}
-}
-// ************************************************************************************** //
-
 // Failsafe Handling
 void MulticopterControl::failsafe(vehicle_local_position_setpoint_s &setpoint, const PositionControlStates &states,
 				     const bool force, const bool warn){
@@ -910,19 +742,6 @@ void MulticopterControl::send_vehicle_cmd_do(uint8_t nav_state){
 }
 // ************************************************************************************** //
 
-// Attitude rates controller.
-void MulticopterControl::control_attitude_rates(float dt, const Vector3f &rates){
-	// reset integral if disarmed
-	if (!_control_mode.flag_armed || _vehicle_status.vehicle_type != vehicle_status_s::VEHICLE_TYPE_ROTARY_WING) {
-		_rate_control.resetIntegral();
-	}
-
-	const bool landed = _vehicle_land_detected.maybe_landed || _vehicle_land_detected.landed;
-	_rate_control.setSaturationStatus(_saturation_status);
-	_att_control = _rate_control.update(rates, _rates_sp, dt, landed);
-}
-// ************************************************************************************** //
-
 // Publish Controls to Actuators
 void MulticopterControl::publish_actuator_controls(){
 	_actuators.control[0] = _att_control(0);
@@ -933,55 +752,9 @@ void MulticopterControl::publish_actuator_controls(){
 	// note: _actuators.timestamp_sample is set in MulticopterAttitudeControl::Run()
 	_actuators.timestamp = hrt_absolute_time();
 
-	/*matrix::Matrix<double, 4, 4> mixer;
-	matrix::Matrix<double, 4, 1> attControl;
-	matrix::Matrix<double, 4, 1> attOutput;
-
-	mixer(0,0) = 1; mixer(0,1) = -1; mixer(0,2) = 1; mixer(0,3) = 1;
-	mixer(1,0) = 1; mixer(1,1) = 1; mixer(1,2) = -1; mixer(1,3) = 1;
-	mixer(2,0) = 1; mixer(2,1) = -1; mixer(2,2) = -1; mixer(2,3) = -1;
-	mixer(3,0) = 1; mixer(3,1) = 1; mixer(3,2) = 1; mixer(3,3) = -1;
-
-	attControl(0,0) = _thrust_sp;
-	attControl(1,0) = _att_control(1);
-	attControl(2,0) = _att_control(0);
-	attControl(3,0) = _att_control(2);
-
-
-	attOutput = mixer*attControl*1000;
-
-	actuator_outputs_s actuator_outputs;
-
-	actuator_outputs.noutputs = 4;
-
-	actuator_outputs.output[1] = attOutput(0,0);
-	actuator_outputs.output[0] = attOutput(1,0);
-	actuator_outputs.output[3] = attOutput(2,0);
-	actuator_outputs.output[2] = attOutput(3,0);
-
-	actuator_outputs.timestamp = hrt_absolute_time();
-	_outputs_pub.publish(actuator_outputs);*/
-
-	/*
-	// Scale effort by battery status
-	if (_param_mc_bat_scale_en.get() && _battery_status.scale > 0.0f) {
-		for (int i = 0; i < 4; i++) {
-			_actuators.control[i] *= _battery_status.scale;
-		}
-	}*/
-
 	if (!_actuators_0_circuit_breaker_enabled) {
 		orb_publish_auto(_actuators_id, &_actuators_0_pub, &_actuators, nullptr, ORB_PRIO_DEFAULT);
 	}
-}
-// ************************************************************************************** //
-
-// Publish Controller Status
-void MulticopterControl::publish_rate_controller_status(){
-	rate_ctrl_status_s rate_ctrl_status = {};
-	rate_ctrl_status.timestamp = hrt_absolute_time();
-	_rate_control.getRateControlStatus(rate_ctrl_status);
-	_controller_status_pub.publish(rate_ctrl_status);
 }
 // ************************************************************************************** //
 
@@ -1034,21 +807,6 @@ bool MulticopterControl::vehicle_attitude_poll(){
 	}
 
 	return false;
-}
-// ************************************************************************************** //
-
-
-// Attitude controller.
-void MulticopterControl::control_attitude(){
-	// Reinitialize the setpoint while not armed to make sure no value from the last mode or flight is still kept
-	if (!_control_mode.flag_armed) {
-		Quatf().copyTo(_att_sp.q_d);
-		Vector3f().copyTo(_att_sp.thrust_body);
-	}
-
-	// Physical thrust axis is the negative of body z axis
-	_thrust_sp = -_att_sp.thrust_body[2];
-	_rates_sp = _attitude_control.update(Quatf(att.q), Quatf(_att_sp.q_d), _att_sp.yaw_sp_move_rate);
 }
 // ************************************************************************************** //
 

@@ -57,12 +57,16 @@
 #include <uORB/topics/tracking_errors.h>
 #include <uORB/topics/freq_control.h>
 
-#include "PositionControl.hpp"
 #include "Utility/ControlMath.hpp"
 #include "Takeoff.hpp"
-#include "AttitudeControl/AttitudeControl.hpp"
-#include "RateControl/RateControl.hpp"
 #include "IMBControl/IMBControl.hpp"
+
+typedef struct{
+	matrix::Vector3f position;
+	matrix::Vector3f velocity;
+	matrix::Vector3f acceleration;
+	float yaw;
+}PositionControlStates;
 
 using namespace time_literals;
 
@@ -96,11 +100,7 @@ private:
 	control::BlockDerivative _vel_y_deriv; 	// Velocity derivative in Y
 	control::BlockDerivative _vel_z_deriv;	// Velocity derivative in Z
 	FlightTasks _flight_tasks;	 			// Class for setpoint task-dependent
-	PositionControl _control; 				// Core of Position PID Control
-	PositionControlStates _states{}; 		// Info for Position Control
-	AttitudeControl _attitude_control; 		// Core of Attitude PID Control
-	RateControl _rate_control; 				// Core of Rate PID Control
-
+	PositionControlStates _states; 		    // Info for Position Control
 	IMBControl _IMBControl;					// Internal Model Based Control
 
 	MultirotorMixer::saturation_status _saturation_status{};
@@ -306,12 +306,6 @@ private:
 
 	// Main sensor collection task.
 	void task_main();
-
-	// Rates controller.
-	void control_attitude_rates(float dt, const matrix::Vector3f &rates);
-
-	// Attitude controller.
-	void control_attitude();
 
 	// Polling on Topics
 	bool vehicle_attitude_poll();
