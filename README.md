@@ -1,11 +1,11 @@
 # PX4 Autopilot - IMB Regulator
-This GitHub repository provides a modified version of PX4 autopilot which implements an Internal Model Based(IMB) position controller able to provide null regime tracking error under periodic excitations. Moreover a new Gazebo plugin has been implemented to simulate the behaviour of an ARVA transceiver systems, and an Extremum Seeking module is used to produce harmonic position trajectories useful to maximize the ARVA function, thus to find out the trasmitter.
+This GitHub repository provides a modified version of PX4 autopilot which implements an Internal Model Based (IMB) position controller able to provide null regime tracking error under periodic excitations. Moreover a new Gazebo plugin has been implemented to simulate the behaviour of an ARVA transceiver systems, and an Extremum Seeking module is used to produce harmonic position trajectories useful to maximize the ARVA function, thus to find out the trasmitter.
 
 ## Internal Model Based Regulator
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/positions.png" width = 70% height = 40% />
+<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/positions.png" width = 60% height = 40% />
 
 ## ARVA Simulator
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/arva.png" width = 50% height = 40% />
+<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/arva.png" width = 60% height = 40% />
 
 ## Bounded Update Rate Extremum Seeking
 
@@ -19,8 +19,8 @@ This GitHub repository provides a modified version of PX4 autopilot which implem
 
 ## References
 *If you use the ARVA plugin or this IMB regulator for your academic research, please cite our related papers.*
-* **Paper Title**, Authors, Conference/Journal/Date ([pdf](link to pdf), [bib](link to bib)).
-* **Paper Title**, Authors, Conference/Journal/Date ([pdf](link to pdf), [bib](link to bib)).
+* **Paper Title**, Authors, Conference/Journal/Date ([PDF](link to pdf), [BibTex](link to bib)).
+* **Paper Title**, Authors, Conference/Journal/Date ([PDF](link to pdf), [BibTex](link to bib)).
 
 ## 1. System Prerequisites
 ### 1.1 Ubuntu and ROS
