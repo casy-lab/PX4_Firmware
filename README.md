@@ -26,11 +26,13 @@
 In order to build and run this autopilot, with the simulated ARVA plugin for Gazebo, one of the following option is required:
 * Ubuntu 64-bit 16.04 with ROS Kinetic.
 * Ubuntu 64-bit 18.04 with ROS Melodic.
+
 Please follow the official [ROS Tutorial](http://wiki.ros.org/ROS/Installation) for installation.
+
 ### 1.2 MAVROS and GeographicLib
 Install ROS repositories for mavros:
 '''
-sudo apt-get install ros-*ros distro*-mavros ros-*ros distro*-mavros-extras
+  sudo apt-get install ros-*ros distro*-mavros ros-*ros distro*-mavros-extras
 '''
 ## 2. Build Autopilot
 
