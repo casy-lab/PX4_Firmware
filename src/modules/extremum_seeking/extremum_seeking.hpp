@@ -7,20 +7,15 @@
 
 #include <px4_module.h>
 #include <px4_module_params.h>
-#include <lib/perf/perf_counter.h>
 
 #include <uORB/Publication.hpp>
-#include <uORB/PublicationQueued.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/parameter_update.h>
-#include <uORB/topics/position_setpoint_triplet.h>
 #include <uORB/topics/vehicle_local_position.h>
-#include <uORB/topics/vehicle_status.h>
-#include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/sensor_arva.h>
-#include <uORB/topics/offboard_control_mode.h>
-#include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/freq_control.h>
+#include <uORB/topics/setpoint_general.h>
+#include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/uORB.h>
 
 #include "px4_custom_mode.h"
@@ -30,7 +25,7 @@
 
 #define Z_REF 5
 #define EPSILON 0.1
-#define FREQ 50
+#define FREQ 10
 
 /** Extremum Seeking Parameters **/
 // For 17Hz
@@ -132,27 +127,21 @@ class ESModule : public ModuleBase<ESModule>, public ModuleParams{
 		hrt_abstime actualTime{hrt_absolute_time()};
 		hrt_abstime previousTime{hrt_absolute_time()};
 
-		perf_counter_t	_loop_perf;
-
 		// Structures
-		struct offboard_control_mode_s 		_offboard_control_mode;
-		struct vehicle_local_position_s 	_local_pos;
-		struct sensor_arva_s			 	_sens_arva;
-		struct position_setpoint_triplet_s	_pos_sp_triplet;
-		struct vehicle_command_s 			_vcmd;
-		struct freq_control_s				_freq;
+		struct vehicle_local_position_s _local_pos;
+		struct sensor_arva_s			_sens_arva;
+		struct setpoint_general_s		_sp_triplet;
+		struct freq_control_s			_freq;
+		struct vehicle_control_mode_s	_mode;
 
 		// Subscriptions
 		uORB::Subscription						 _parameter_update_sub{ORB_ID(parameter_update)};
-		uORB::Subscription						 _control_mode_sub{ORB_ID(vehicle_control_mode)};
-		uORB::SubscriptionData<vehicle_status_s> _vehicle_status_sub{ORB_ID(vehicle_status)};
 		uORB::Subscription						 _arva_sub{ORB_ID(sensor_arva)};
 		uORB::Subscription       				 _local_pos_sub{ORB_ID(vehicle_local_position)};
+		uORB::Subscription						 _vehicle_control_mode_sub{ORB_ID(vehicle_control_mode)};
 
 		// Publications
-		uORB::Publication<position_setpoint_triplet_s> 	_pos_sp_triplet_pub{ORB_ID(position_setpoint_triplet)};
-		uORB::Publication<offboard_control_mode_s>		_offboard_control_mode_pub{ORB_ID(offboard_control_mode)};
-		uORB::PublicationQueued<vehicle_command_s> 		_cmd_pub{ORB_ID(vehicle_command)};
-		uORB::Publication<freq_control_s>				_freq_pub{ORB_ID(freq_control)};
+		uORB::Publication<setpoint_general_s> 	_sp_triplet_pub{ORB_ID(setpoint_general)};
+		uORB::Publication<freq_control_s>		_freq_pub{ORB_ID(freq_control)};
 };
 

@@ -51,15 +51,17 @@ fi
 #
 # Start Multicopter Attitude Controller.
 #
-#mc_att_control start
+mc_att_control start
 
 #
 # Start Multicopter Position Controller.
 #
-#mc_pos_control start
-mc_control start
+mc_pos_control start
 
 #
 # Start Multicopter Land Detector.
 #
 land_detector start multicopter
+
+# Custom Apps
+extremum_seeking start

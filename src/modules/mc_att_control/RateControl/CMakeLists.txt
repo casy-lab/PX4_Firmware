@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2015 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2019 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -31,29 +31,14 @@
 #
 ############################################################################
 
-add_subdirectory(Takeoff)
-add_subdirectory(IMBControl)
+px4_add_library(RateControl
+	RateControl.cpp
+)
+target_include_directories(RateControl
+	PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}
+)
 
-px4_add_module(
-	MODULE modules__mc_control
-	MAIN mc_control
-	STACK_MAX 3500
-	COMPILE_FLAGS
-		-Wno-implicit-fallthrough # TODO: fix and remove
-	SRCS
-		mc_control_main.cpp
-		Utility/ControlMath.cpp
-	DEPENDS
-		controllib
-		FlightTasks
-		git_ecl
-		ecl_geo
-		WeatherVane
-		CollisionPrevention
-		Takeoff
-		circuit_breaker
-		conversion
-		mathlib
-		IMBControl
-		px4_work_queue
-	)
+target_link_libraries(RateControl PRIVATE mathlib)
+
+px4_add_unit_gtest(SRC RateControlTest.cpp LINKLIBS RateControl)

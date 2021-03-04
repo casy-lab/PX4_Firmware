@@ -368,6 +368,10 @@ main_state_transition(const vehicle_status_s &status, const main_state_t new_mai
 
 		break;
 
+	case commander_state_s::MAIN_STATE_SEARCH:
+		ret = TRANSITION_CHANGED;
+		break;
+
 	case commander_state_s::MAIN_STATE_MAX:
 	default:
 		break;
@@ -714,6 +718,13 @@ bool set_nav_state(vehicle_status_s *status, actuator_armed_s *armed, commander_
 		} else {
 			status->nav_state = vehicle_status_s::NAVIGATION_STATE_OFFBOARD;
 		}
+
+		break;
+
+	case commander_state_s::MAIN_STATE_SEARCH:
+		status->nav_state = vehicle_status_s::NAVIGATION_STATE_SEARCH;
+
+		break;
 
 	default:
 		break;

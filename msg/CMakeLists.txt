@@ -151,6 +151,7 @@ set(msg_files
 	sensor_arva.msg
 	tracking_errors.msg
 	freq_control.msg
+	setpoint_general.msg
 	)
 
 if(NOT EXTERNAL_MODULES_LOCATION STREQUAL "")

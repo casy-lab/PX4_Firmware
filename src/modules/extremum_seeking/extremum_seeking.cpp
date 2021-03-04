@@ -133,7 +133,7 @@ void ExSeekingBUR::reset(){
 
 // ** ESModule Class ** //
 // Constructor
-ESModule::ESModule() : ModuleParams(nullptr), _loop_perf(perf_alloc(PC_ELAPSED, "es_module")){
+ESModule::ESModule() : ModuleParams(nullptr){
 	_ref_gen = new ExSeekingBUR;
 }
 
@@ -146,63 +146,12 @@ ESModule::~ESModule(){
 void ESModule::run(){
 	PX4_INFO("Extremum Seeking Module Start");
 
-	// Arming Vehicle
-	_vcmd.param1 	= 1.f;
-	_vcmd.param2 	= 0.f;
-	_vcmd.param3 	= NAN;
-	_vcmd.param4 	= NAN;
-	_vcmd.param5 	= NAN;
-	_vcmd.param6 	= NAN;
-	_vcmd.param7 	= NAN;
-	_vcmd.command 	= vehicle_command_s::VEHICLE_CMD_COMPONENT_ARM_DISARM;
-
-	_vcmd.source_system 	= _vehicle_status_sub.get().system_id;
-	_vcmd.target_system 	= _vehicle_status_sub.get().system_id;
-	_vcmd.source_component 	= _vehicle_status_sub.get().component_id;
-	_vcmd.target_component 	= _vehicle_status_sub.get().component_id;
-	_vcmd.timestamp 		= hrt_absolute_time();
-
-	_cmd_pub.publish(_vcmd);
-	// -- //
-
-	// Fill OffBoard Msg Mode
-	_offboard_control_mode.ignore_position 				= false;
-	_offboard_control_mode.ignore_alt_hold 				= true;
-	_offboard_control_mode.ignore_attitude 				= true;
-	_offboard_control_mode.ignore_thrust 				= true;
-	_offboard_control_mode.ignore_bodyrate_x			= true;
-	_offboard_control_mode.ignore_bodyrate_y			= true;
-	_offboard_control_mode.ignore_bodyrate_z			= true;
-	_offboard_control_mode.ignore_velocity 				= true;
-	_offboard_control_mode.ignore_acceleration_force	= true;
-
-	_offboard_control_mode_pub.publish(_offboard_control_mode);
-	// -- //
-
-	// Fill OffBoard Cmd
-	_vcmd.param1 = 1;
-	_vcmd.param2 = PX4_CUSTOM_MAIN_MODE_OFFBOARD;
-	_vcmd.param3 = NAN;
-	_vcmd.param4 = NAN;
-	_vcmd.param5 = NAN;
-	_vcmd.param6 = NAN;
-	_vcmd.param7 = NAN;
-	_vcmd.command = vehicle_command_s::VEHICLE_CMD_DO_SET_MODE;
-
-	_vcmd.source_system 	= _vehicle_status_sub.get().system_id;
-	_vcmd.target_system 	= _vehicle_status_sub.get().system_id;
-	_vcmd.source_component 	= _vehicle_status_sub.get().component_id;
-	_vcmd.target_component 	= _vehicle_status_sub.get().component_id;
-
-	_cmd_pub.publish(_vcmd);
-	// -- //
-
 	while(!should_exit()){
-		perf_begin(_loop_perf);
 		actualTime = hrt_absolute_time();
+		_vehicle_control_mode_sub.update(&_mode);
 
 		// Update at Wanted Frequency
-		if(actualTime - previousTime >= ((double)1/FREQ)*1e6){
+		if(actualTime - previousTime >= ((double)1/FREQ)*1e6 && _mode.flag_control_search_enabled && _mode.flag_armed){
 			_freq.freq = actualTime - previousTime;
 			_freq.timestamp = actualTime;
 			_freq_pub.publish(_freq);
@@ -211,24 +160,15 @@ void ESModule::run(){
 			// Update Info from Topics
 			_local_pos_sub.update(&_local_pos);
 			_arva_sub.update(&_sens_arva);
-
-			// Publish Offboard Request Constantly 
-			// Set Time
-			_offboard_control_mode.timestamp = hrt_absolute_time();
-			_vcmd.timestamp 				 = hrt_absolute_time();
-
-			// Publish
-			_offboard_control_mode_pub.publish(_offboard_control_mode);
-			_cmd_pub.publish(_vcmd);
 			// -- //
 
 			// State Machine For TakeOff and ES Search
 			switch (_state){
 				case TAKEOFF:
 				// Takeoff Triplet
-				_pos_sp_triplet.current.x = 0.0;
-				_pos_sp_triplet.current.y = 0.0;
-				_pos_sp_triplet.current.z = -Z_REF;
+				_sp_triplet.x = 0.0;
+				_sp_triplet.y = 0.0;
+				_sp_triplet.z = -Z_REF;
 
 				if(abs((double)_local_pos.z + Z_REF) < EPSILON){
 					_state = SEARCH;
@@ -240,35 +180,16 @@ void ESModule::run(){
 					// Search Triplet
 					matrix::Matrix<double, 2, 1> ref = _ref_gen->update(_sens_arva.y);
 
-					_pos_sp_triplet.current.x 	= ref(0,0);
-					_pos_sp_triplet.current.y 	= ref(1,0);
-					_pos_sp_triplet.current.z 	= -Z_REF;
+					_sp_triplet.x 	= ref(0,0);
+					_sp_triplet.y 	= ref(1,0);
+					_sp_triplet.z 	= -Z_REF;
+					_sp_triplet.timestamp = hrt_absolute_time();
 				break;
 			}
 
-			// Always Publish Set Points //
-			// Fill Set Point Msg
-			_pos_sp_triplet.previous.valid				= false;
-			_pos_sp_triplet.next.valid					= false;
-			_pos_sp_triplet.current.valid 				= true;
-			_pos_sp_triplet.current.position_valid		= true;
-			_pos_sp_triplet.current.acceleration_valid	= false;
-			_pos_sp_triplet.current.velocity_valid 		= false;
-			_pos_sp_triplet.current.yaw_valid	 		= true;
-			_pos_sp_triplet.current.yawspeed_valid 		= false;
-			_pos_sp_triplet.current.alt_valid	 		= true;
-
-			_pos_sp_triplet.current.type 				= position_setpoint_s::SETPOINT_TYPE_POSITION;
-			_pos_sp_triplet.current.timestamp 			= hrt_absolute_time();
-			_pos_sp_triplet.timestamp 					= hrt_absolute_time();
-
-			_pos_sp_triplet.current.yaw					= 0.0;
-
 			// Publish
-			_pos_sp_triplet_pub.publish(_pos_sp_triplet);
+			_sp_triplet_pub.publish(_sp_triplet);
 		}
-
-		perf_end(_loop_perf);
 	}
 }
 
