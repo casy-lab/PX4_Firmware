@@ -77,12 +77,7 @@ ExSeekingBUR::ExSeekingBUR(){
 	fPlus 			= 0.0;
 	f 				= 0.0;
 	alpha 			= 0.0;
-	uX 				= 0.0;
-	uXPlus 			= 0.0;
-	uY 				= 0.0;
-	uYPlus			= 0.0;
 	time			= 0.0;
-	previousTime	= 0.0;
 }
 
 // Destructor
@@ -99,20 +94,13 @@ matrix::Matrix<double, 2, 1> ExSeekingBUR::update(double y){
 	time = (hrt_absolute_time() - startTime)/1e6;
 
 	// X - Direction
-    uXPlus = uX + (time-previousTime)*(sqrt(alpha*OMEGA_BUR)*cos(OMEGA_BUR*time + KAPPA_BUR*y));
+    x(0,0) = sqrt(alpha*OMEGA_BUR)*cos(OMEGA_BUR*time + KAPPA_BUR*y);
 
     // Y - Direction
-    uYPlus = uY + (time-previousTime)*(sqrt(alpha*OMEGA_BUR)*sin(OMEGA_BUR*time + KAPPA_BUR*y));
-
-	// Fill Return Vector
-	x(0,0) = uX;
-	x(1,0) = uY;
+    x(1,0) = sqrt(alpha*OMEGA_BUR)*sin(OMEGA_BUR*time + KAPPA_BUR*y);
 
 	// Update Memory Variables
-    f 	= fPlus;	
-    uX 	= uXPlus;
-    uY 	= uYPlus;
-	previousTime = time;
+    f 	= fPlus;
 
 	return x;
 }
@@ -121,12 +109,7 @@ void ExSeekingBUR::reset(){
 	fPlus 			= 0.0;
 	f 				= 0.0;
 	alpha 			= 0.0;
-	uX 				= 0.0;
-	uXPlus 			= 0.0;
-	uY 				= 0.0;
-	uYPlus			= 0.0;
 	time			= 0.0;
-	previousTime	= 0.0;
 }
 
 // -------------------------------------------------------------- //

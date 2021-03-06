@@ -60,6 +60,7 @@
 #include <uORB/topics/landing_gear.h>
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/setpoint_general.h>
+#include <uORB/topics/tracking_errors.h>
 #include <vtol_att_control/vtol_type.h>
 
 #include <AttitudeControl.hpp>
@@ -161,6 +162,7 @@ private:
 	uORB::PublicationMulti<rate_ctrl_status_s>	_controller_status_pub{ORB_ID(rate_ctrl_status), ORB_PRIO_DEFAULT};	/**< controller status publication */
 	uORB::Publication<landing_gear_s>		_landing_gear_pub{ORB_ID(landing_gear)};
 	uORB::Publication<vehicle_rates_setpoint_s>	_v_rates_sp_pub{ORB_ID(vehicle_rates_setpoint)};			/**< rate setpoint publication */
+	uORB::Publication<tracking_errors_s>					_errors_pub{ORB_ID(tracking_errors)};
 
 	orb_advert_t	_actuators_0_pub{nullptr};		/**< attitude actuator controls publication */
 	orb_advert_t	_vehicle_attitude_setpoint_pub{nullptr};
@@ -182,6 +184,7 @@ private:
 	struct landing_gear_s 			_landing_gear {};
 	struct vehicle_local_position_s 	_local_pos;
 	struct setpoint_general_s			_sp_triplet;
+	struct tracking_errors_s			_errors{};
 
 	MultirotorMixer::saturation_status _saturation_status{};
 

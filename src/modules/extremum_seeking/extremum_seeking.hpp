@@ -45,16 +45,22 @@
 #define OMEGA 0.65
 
 /** Bounded Update Rate ES Parameters **/
-// For 50Hz
-// TF: 1/10s+1
-#define FA_BUR 0.9980
-#define FB_BUR 0.0625
-#define FC_BUR 0.0319
-#define FD_BUR 9.99e-4
+// For 10Hz
+/*
+#define FA_BUR 0.9900
+#define FB_BUR 0.1250
+#define FC_BUR 0.0792
+#define FD_BUR 0.0050
+*/
+
+#define FA_BUR 0.9802
+#define FB_BUR 0.1250
+#define FC_BUR 0.1568
+#define FD_BUR 0.0099
 
 #define OMEGA_BUR 0.65
 #define ALPHA_BUR 10
-#define KAPPA_BUR 0.06 // Should be 0.05 < K < 0.1
+#define KAPPA_BUR 0.1 // Should be 0.05 < K < 0.1
 
 typedef enum{TAKEOFF, SEARCH} uav_state;
 
@@ -86,8 +92,7 @@ class ExSeeking{
 class ExSeekingBUR{
 	private:
 	double fPlus, f, alpha;
-	double uX, uXPlus, uY, uYPlus;
-	double time, previousTime;
+	double time;
 
 	public:
 	// Constructor

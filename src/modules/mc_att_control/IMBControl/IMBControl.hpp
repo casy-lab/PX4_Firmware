@@ -23,20 +23,20 @@ class IMBControl{
     private:
     /* Attributes */
     // Roll Matrices
-    matrix::Matrix<double, 3, 3> Ar;
-    matrix::Matrix<double, 3, 1> Br;
-    matrix::Matrix<double, 3, 3> Cr;
-    matrix::Matrix<double, 3, 1> Dr;
-    matrix::Matrix<double, 1, 7> Kr;
-    matrix::Matrix<double, 3, 1> zRoll;
+    matrix::Matrix<double, 2, 2> Ar;
+    matrix::Matrix<double, 2, 1> Br;
+    matrix::Matrix<double, 2, 2> Cr;
+    matrix::Matrix<double, 2, 1> Dr;
+    matrix::Matrix<double, 1, 5> Kr;
+    matrix::Matrix<double, 2, 1> zRoll;
 
     // Pitch Matrices
-    matrix::Matrix<double, 3, 3> Ap;
-    matrix::Matrix<double, 3, 1> Bp;
-    matrix::Matrix<double, 3, 3> Cp;
-    matrix::Matrix<double, 3, 1> Dp;
-    matrix::Matrix<double, 1, 7> Kp;
-    matrix::Matrix<double, 3, 1> zPitch;
+    matrix::Matrix<double, 2, 2> Ap;
+    matrix::Matrix<double, 2, 1> Bp;
+    matrix::Matrix<double, 2, 2> Cp;
+    matrix::Matrix<double, 2, 1> Dp;
+    matrix::Matrix<double, 1, 5> Kp;
+    matrix::Matrix<double, 2, 1> zPitch;
 
     // Yaw Matrix
     matrix::Matrix<double, 1, 2> Ky;
@@ -50,10 +50,10 @@ class IMBControl{
     double zV = 0.0;
 
     // Roll Controller
-    double rollCtrl(double y, double yDot, double phi, double phiDot, double yRef);
+    double rollCtrl(double yDot, double phi, double phiDot, double yRef);
 
     // Pitch Controller
-    double pitchCtrl(double x, double xDot, double theta, double thetaDot, double xRef);
+    double pitchCtrl(double xDot, double theta, double thetaDot, double xRef);
 
     // Yaw Controller
     double yawCtrl(double psi, double psiDot);

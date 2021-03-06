@@ -591,7 +591,7 @@ MulticopterAttitudeControl::Run()
 		// IMB Control
 		// Fill State and SetPoint MSGS
 		matrix::Matrix<double, 12, 1> actualState;
-		matrix::Matrix<double, 3, 1> poseSetPoint;
+		matrix::Matrix<double, 3, 1> setPoint;
 		double phi = atan2(2*(quaternion(0,0)*quaternion(1,0) + quaternion(2,0)*quaternion(3,0)),
 								1 - 2*(pow(quaternion(1,0), 2) + pow(quaternion(2,0), 2)));
 		double theta = asin(2*(quaternion(0,0)*quaternion(2,0) - quaternion(3,0)*quaternion(1,0)));
@@ -600,36 +600,58 @@ MulticopterAttitudeControl::Run()
 								1 - 2*(pow(quaternion(2,0), 2) + pow(quaternion(3,0), 2)));
 
 		// States are Memorized As
-		// 0:x / 1:y / 2:z / 3:xDot / 4:yDot / 5:zDot
+		// 0:z / 3:xDot / 4:yDot / 5:zDot
 		// 6:phi / 7:theta / 8:psi / 9:phiDot / 10:thetaDot / 11:psiDot
-		actualState(0,0) = _local_pos.x;
-		actualState(1,0) = _local_pos.y;
-		actualState(2,0) = _local_pos.z;
-		actualState(3,0) = _local_pos.vx;
-		actualState(4,0) = _local_pos.vy;
-		actualState(5,0) = _local_pos.vz;
-		actualState(6,0) = phi;
-		actualState(7,0) = theta;
-		actualState(8,0) = psi;
-		actualState(9,0) = rates(0);
-		actualState(10,0) = rates(1);
-		actualState(11,0) = rates(2);
+		actualState(0,0) = _local_pos.z;
+		actualState(1,0) = _local_pos.vx;
+		actualState(2,0) = _local_pos.vy;
+		actualState(3,0) = _local_pos.vz;
+		actualState(4,0) = phi;
+		actualState(5,0) = theta;
+		actualState(6,0) = psi;
+		actualState(7,0) = rates(0);
+		actualState(8,0) = rates(1);
+		actualState(9,0) = rates(2);
 
-		poseSetPoint(0,0) = _sp_triplet.x;
-		poseSetPoint(1,0) = _sp_triplet.y;
-		poseSetPoint(2,0) = _sp_triplet.z;
+		setPoint(0,0) = _sp_triplet.x;
+		setPoint(1,0) = _sp_triplet.y;
+		setPoint(2,0) = _sp_triplet.z;
+
+		// Publish Errors
+		_errors.ex = _local_pos.vx - _sp_triplet.x;
+		_errors.ey = _local_pos.vy - _sp_triplet.y;
+		_errors.ez = _local_pos.z - _sp_triplet.z;
+		_errors.timestamp = hrt_absolute_time();
+		_errors_pub.publish(_errors);
 
 		// Update Control
-		matrix::Matrix<double, 4, 1> controlAction = _IMBControl.update(actualState, poseSetPoint, dt);
+		matrix::Matrix<double, 4, 1> controlAction = _IMBControl.update(actualState, setPoint, dt);
 		// controlAction(0,0) /= 7;
 		// controlAction(1,0) /= 4;
 		// controlAction(2,0) /= 4;
 		controlAction(3,0) /= 27.15;
 
-		_actuators.control[0] = controlAction(0,0);
-		_actuators.control[1] = controlAction(1,0);
-		_actuators.control[2] = controlAction(2,0);
-		_actuators.control[3] = controlAction(3,0);
+		if(controlAction(0,0) > 0){
+			_actuators.control[0] = controlAction(0,0)>1 ? 1.0 : controlAction(0,0);
+		} else{
+			_actuators.control[0] = controlAction(0,0)<-1 ? -1.0 : controlAction(0,0);
+		}
+		if(controlAction(1,0) > 0){
+			_actuators.control[1] = controlAction(1,0)>1 ? 1.0 : controlAction(1,0);
+		} else{
+			_actuators.control[1] = controlAction(1,0)<-1 ? -1.0 : controlAction(1,0);
+		}
+		if(controlAction(2,0) > 0){
+			_actuators.control[2] = controlAction(2,0)>1 ? 1.0 : controlAction(2,0);
+		} else{
+			_actuators.control[2] = controlAction(2,0)<-1 ? -1.0 : controlAction(2,0);
+		}
+		if(controlAction(3,0) > 0){
+			_actuators.control[3] = controlAction(3,0)>1 ? 1.0 : controlAction(3,0);
+		} else{
+			_actuators.control[3] = 0.0;
+		}
+			
 		_actuators.timestamp = hrt_absolute_time();
 		orb_publish_auto(_actuators_id, &_actuators_0_pub, &_actuators, nullptr, ORB_PRIO_DEFAULT);
 
@@ -638,6 +660,7 @@ MulticopterAttitudeControl::Run()
 		}
 	}
 
+	orb_publish_auto(_actuators_id, &_actuators_0_pub, &_actuators, nullptr, ORB_PRIO_DEFAULT);
 	perf_end(_loop_perf);
 }
 
