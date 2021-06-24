@@ -32,7 +32,7 @@ matrix::Matrix<double, 2, 1> ExSeeking::update(double y){
 	time = (hrt_absolute_time() - startTime)/1e6;
 
 	// Update Z
-	zPlus =  A*z + B*y;
+	zPlus = A*z + B*y;
     yZ = -C*z + C*y;
 
 	// Update alpha (Reference pre-filtering)
@@ -78,29 +78,38 @@ ExSeekingBUR::ExSeekingBUR(){
 	f 				= 0.0;
 	alpha 			= 0.0;
 	time			= 0.0;
+	previousTime	= 0.0;
+	xOld 			= 0.0;
+	yOld 			= 0.0;
 }
 
 // Destructor
 ExSeekingBUR::~ExSeekingBUR(){;}
 
 // Main Functions
-matrix::Matrix<double, 2, 1> ExSeekingBUR::update(double y){
-	matrix::Matrix<double, 2, 1> x;
+matrix::Matrix<double, 3, 1> ExSeekingBUR::update(double y){
+	matrix::Matrix<double, 3, 1> x;
 	
-	// Update alpha (Reference pre-filtering)
 	fPlus = FA_BUR*f + FB_BUR*ALPHA_BUR;
     alpha = FC_BUR*f + FD_BUR*ALPHA_BUR;
 
 	time = (hrt_absolute_time() - startTime)/1e6;
+	double deltaTime = time - previousTime;
 
 	// X - Direction
-    x(0,0) = sqrt(alpha*OMEGA_BUR)*cos(OMEGA_BUR*time + KAPPA_BUR*y);
+    x(0,0) = xOld + (sqrt(alpha*OMEGA_BUR)*cos(OMEGA_BUR*time + KAPPA_BUR*y))*deltaTime;
 
     // Y - Direction
-    x(1,0) = sqrt(alpha*OMEGA_BUR)*sin(OMEGA_BUR*time + KAPPA_BUR*y);
+    x(1,0) = yOld + (sqrt(alpha*OMEGA_BUR)*sin(OMEGA_BUR*time + KAPPA_BUR*y))*deltaTime;
+
+	// Z - Direction
+	x(2,0) = 0.0;
 
 	// Update Memory Variables
-    f 	= fPlus;
+    f = fPlus;
+	xOld = x(0,0);
+	yOld = x(1,0);
+	previousTime = time;
 
 	return x;
 }
@@ -110,6 +119,9 @@ void ExSeekingBUR::reset(){
 	f 				= 0.0;
 	alpha 			= 0.0;
 	time			= 0.0;
+	previousTime	= 0.0;
+	xOld 			= 0.0;
+	yOld 			= 0.0;
 }
 
 // -------------------------------------------------------------- //
@@ -118,6 +130,22 @@ void ExSeekingBUR::reset(){
 // Constructor
 ESModule::ESModule() : ModuleParams(nullptr){
 	_ref_gen = new ExSeekingBUR;
+
+	iRp(0,0) = 0.5770;
+	iRp(0,1) = -0.7071;
+	iRp(0,2) = -0.4087;
+
+	iRp(1,0) = 0.5770;
+	iRp(1,1) = 0.7071;
+	iRp(1,2) = -0.4087;
+
+	iRp(2,0) = 0.5780;
+	iRp(2,1) = 0.0;
+	iRp(2,2) = 0.8161;
+
+	Op(0,0) = 0.0;
+	Op(1,0) = 0.0;
+	Op(2,0) = 6.1268;
 }
 
 //Destructor
@@ -142,7 +170,19 @@ void ESModule::run(){
 
 			// Update Info from Topics
 			_local_pos_sub.update(&_local_pos);
-			_arva_sub.update(&_sens_arva);
+
+			if(_arva_sub.update(&_sens_arva)){
+				if(isFirstTime){
+					f = ((1-FD_ARVA)*(double)_sens_arva.y)/FC_ARVA;
+					isFirstTime = false;
+				}
+
+				// Update ARVA
+				fPlus = FA_ARVA*f + FB_ARVA*(double)_sens_arva.y;
+    			_arva_filtered = FC_ARVA*f + FD_ARVA*(double)_sens_arva.y;
+
+				f = fPlus;
+			}
 			// -- //
 
 			// State Machine For TakeOff and ES Search
@@ -152,20 +192,32 @@ void ESModule::run(){
 				_sp_triplet.x = 0.0;
 				_sp_triplet.y = 0.0;
 				_sp_triplet.z = -Z_REF;
+				_sp_triplet.timestamp = hrt_absolute_time();
 
 				if(abs((double)_local_pos.z + Z_REF) < EPSILON){
-					_state = SEARCH;
-					startTime = hrt_absolute_time();
+					count++;
+
+					if(count == (int)200){
+						_state = SEARCH;
+						startTime = hrt_absolute_time();
+					}
+
+				}else {
+					count = 0;
 				}
+
 				break;
 
 				case SEARCH:
 					// Search Triplet
-					matrix::Matrix<double, 2, 1> ref = _ref_gen->update(_sens_arva.y);
+					matrix::Matrix<double, 3, 1> sp_p = _ref_gen->update(_arva_filtered);
 
-					_sp_triplet.x 	= ref(0,0);
-					_sp_triplet.y 	= ref(1,0);
-					_sp_triplet.z 	= -Z_REF;
+					// Search On Plane
+					matrix::Matrix<double, 3, 1> sp_i = Op + iRp*sp_p;
+
+					_sp_triplet.x 	= sp_i(0,0);
+					_sp_triplet.y 	= sp_i(1,0);
+					_sp_triplet.z 	= -sp_i(2,0);
 					_sp_triplet.timestamp = hrt_absolute_time();
 				break;
 			}

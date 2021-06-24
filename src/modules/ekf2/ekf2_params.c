@@ -628,7 +628,7 @@ PARAM_DEFINE_FLOAT(EKF2_TAS_GATE, 3.0f);
  * @bit 8 vision velocity fusion
  * @reboot_required true
  */
-PARAM_DEFINE_INT32(EKF2_AID_MASK, 1);
+PARAM_DEFINE_INT32(EKF2_AID_MASK, 0);
 
 /**
  * Determines the primary source of height data used by the EKF.
@@ -642,7 +642,7 @@ PARAM_DEFINE_INT32(EKF2_AID_MASK, 1);
  * @value 3 Vision
  * @reboot_required true
  */
-PARAM_DEFINE_INT32(EKF2_HGT_MODE, 0);
+PARAM_DEFINE_INT32(EKF2_HGT_MODE, 1);
 
 /**
  * Maximum lapsed time from last fusion of measurements that constrain velocity drift before the EKF will report the horizontal nav solution as invalid.

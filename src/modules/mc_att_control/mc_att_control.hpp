@@ -61,6 +61,7 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/setpoint_general.h>
 #include <uORB/topics/tracking_errors.h>
+#include <uORB/topics/distance_sensor.h>
 #include <vtol_att_control/vtol_type.h>
 
 #include <AttitudeControl.hpp>
@@ -153,6 +154,7 @@ private:
 	uORB::Subscription _battery_status_sub{ORB_ID(battery_status)};			/**< battery status subscription */
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};	/**< vehicle land detected subscription */
 	uORB::Subscription _landing_gear_sub{ORB_ID(landing_gear)};
+	uORB::Subscription _distance_sensor_sub{ORB_ID(distance_sensor)};
 
 	uORB::Subscription       				 _local_pos_sub{ORB_ID(vehicle_local_position)};
 	uORB::Subscription					  	 _sp_triplet_sub{ORB_ID(setpoint_general)};
@@ -185,6 +187,7 @@ private:
 	struct vehicle_local_position_s 	_local_pos;
 	struct setpoint_general_s			_sp_triplet;
 	struct tracking_errors_s			_errors{};
+	struct distance_sensor_s		_ground_dist;
 
 	MultirotorMixer::saturation_status _saturation_status{};
 
