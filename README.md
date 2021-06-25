@@ -4,6 +4,7 @@ This GitHub repository provides a modified version of the PX4 autopilot which im
 ## Internal Model Based Regulator
 *Results of the software in the loop simulation.*
 <img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/sitl.png" width = 100% height = 50% />
+
 *Results of the hardware in the loop simulation.*
 <img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/hitl.png" width = 100% height = 50% />
 
@@ -47,7 +48,7 @@ Install Gazebo simulator:
 sudo apt-get install ros-*ros_distro*-gazebo-ros-pkgs ros-*ros_distro*-gazebo-ros-control
 ```
 
-## 2. Build Autopilot
+## 2. Build The Autopilot
 Clone the code from GitHub repository:
 ```
 git clone https://github.com/casy-lab/PX4_Firmware --recursive
