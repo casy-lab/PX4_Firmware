@@ -2,8 +2,8 @@
 This GitHub repository provides a modified version of the PX4 autopilot which implements a new Internal Model Based (IMB) position controller able to provide null regime tracking errors under periodic excitations. Moreover a new Gazebo plugin has been implemented to simulate the behaviour of an ARVA transceiver systems, and an Extremum Seeking module is used to produce harmonic position trajectories useful to maximize the ARVA function, thus to find out the trasmitter.
 
 ## Internal Model Based Regulator
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/branch/airborne/support_files/sitl.png" width = 100% height = 50% />
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/branch/airborne/support_files/hitl.png" width = 100% height = 50% />
+<img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/sitl.png" width = 100% height = 50% />
+<img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/hitl.png" width = 100% height = 50% />
 
 ## Authors
   * Ilario Antonio Azzollini - Phd Student
@@ -15,7 +15,7 @@ This GitHub repository provides a modified version of the PX4 autopilot which im
 
 ## References
 *If you use the ARVA plugin or this IMB regulator for your academic research, please cite our related papers.*
-* I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([PDF](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/branch/airborne/support_files/bib_ifac.txt)).
+* I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([PDF](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt)).
 * **Paper Title**, Authors, Conference/Journal/Date ([PDF](link to pdf), [BibTex](link to bib)).
 
 ## 1. System Prerequisites
