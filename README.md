@@ -1,13 +1,9 @@
-# PX4 Autopilot - IMB Regulator
+# PX4 Firmware - IBM & ARVA Sensor Extension
 This GitHub repository provides a modified version of PX4 autopilot which implements an Internal Model Based (IMB) position controller able to provide null regime tracking error under periodic excitations. Moreover a new Gazebo plugin has been implemented to simulate the behaviour of an ARVA transceiver systems, and an Extremum Seeking module is used to produce harmonic position trajectories useful to maximize the ARVA function, thus to find out the trasmitter.
 
 ## Internal Model Based Regulator
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/positions.png" width = 60% height = 40% />
-
-## ARVA Simulator
-<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/arva.png" width = 60% height = 40% />
-
-## Bounded Update Rate Extremum Seeking
+<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/sitl.png" width = 60% height = 40% />
+<img src="https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/hitl.png" width = 60% height = 40% />
 
 ## Authors
   * Ilario Antonio Azzollini - Phd Student
