@@ -1,0 +1,13 @@
+@article{Azzollini2020Extremum,
+title = {An {E}xtremum {S}eeking {A}pproach to {S}earch and {R}escue {O}perations in {A}valanches using {ARVA}},
+journal = {IFAC-PapersOnLine},
+volume = {53},
+number = {2},
+pages = {1627-1632},
+year = {2020},
+note = {21th IFAC World Congress},
+issn = {2405-8963},
+doi = {https://doi.org/10.1016/j.ifacol.2020.12.2214},
+url = {https://www.sciencedirect.com/science/article/pii/S2405896320328706},
+author = {Ilario Antonio Azzollini and Nicola Mimmo and Lorenzo Marconi}
+}

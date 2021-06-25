@@ -12,14 +12,14 @@ This GitHub repository provides a modified version of PX4 autopilot which implem
 ## Authors
   * Ilario Antonio Azzollini - Phd Student
     * Email: ilario.azzollini@unibo.it
-  * Lorenzo Gentilini - Phd Student
-    * Email: lorenzo.gentilini6@unibo.it
   * Nicola Mimmo - Junior Assistant Professor
     * Email: nicola.mimmmo2@unibo.it
+  * Lorenzo Gentilini - Phd Student
+    * Email: lorenzo.gentilini6@unibo.it
 
 ## References
 *If you use the ARVA plugin or this IMB regulator for your academic research, please cite our related papers.*
-* **Paper Title**, Authors, Conference/Journal/Date ([PDF](link to pdf), [BibTex](link to bib)).
+* I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([PDF](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/lorenzogentilini/ab_es_proj_firmware/blob/devel/lorenzo/support_files/bib_ifac.txt)).
 * **Paper Title**, Authors, Conference/Journal/Date ([PDF](link to pdf), [BibTex](link to bib)).
 
 ## 1. System Prerequisites
