@@ -19,7 +19,7 @@ The core files with the implementation of the three units can be found in the fo
 ## References
 For the details of the work, please refer to the papers:
 * [1] I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([Paper](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt)).
-* [2] I.A. Azzollini, N. Mimmo, L. Gentilini, and L. Marconi. **UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach**. arXiv preprint arXiv:2106.14514, 2021. ([Paper](https://arxiv.org/abs/2106.14514), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt).
+* [2] I.A. Azzollini, N. Mimmo, L. Gentilini, and L. Marconi. **UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach**. arXiv preprint arXiv:2106.14514, 2021. ([Paper](https://arxiv.org/abs/2106.14514), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_arxiv.txt)).
 
 In particular, this repository contains the code related to the complete solution presented in [2], which is an extension of [1].
 
