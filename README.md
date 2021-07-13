@@ -1,18 +1,17 @@
 # PX4 Firmware Extension for "UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach"
 In the context of the european project [AirBorne](https://www.airborne-project.eu/), this work deals with the problem of localizing a victim buried by an avalanche by means of a drone equipped with an ARVA (Appareil de Recherche de Victimes d'Avalanche) sensor. The proposed control solution is based on three main units: the ARVA measurement conditioning unit, the Extremum Seeking (ES)-based reference position generator unit, and the Internal Model-Based (IMB) low-level position control unit. This control strategy is shown to succeed in steering the drone in a neighborhood of the victim position. The effectiveness and robustness of the proposed algorithm has been tested by using the code provided in this repo. In particular, a modified version of the PX4 autopilot implementing the aforementioned ES unit and IMB unit has been developed. Moreover, a new Gazebo plugin has been implemented to simulate the behavior of the ARVA unit.
 
-ES reference position generator unit: https://github.com/casy-lab/PX4_Firmware/tree/branch/airborne/src/modules/extremum_seeking
-
-IMB low-level control unit: https://github.com/casy-lab/PX4_Firmware/tree/branch/airborne/src/modules/mc_att_control/IMBControl
-
-ARVA measurement conditioning unit: https://github.com/casy-lab/sitl_gazebo/blob/7d7b4af2a106626ff2d1b6bf38c0151bb2c50f04/src/gazebo_arva_plugin.cpp
+The core files with the implementation of the three units can be found in the following.
+* ES reference position generator unit: https://github.com/casy-lab/PX4_Firmware/tree/branch/airborne/src/modules/extremum_seeking
+* IMB low-level control unit: https://github.com/casy-lab/PX4_Firmware/tree/branch/airborne/src/modules/mc_att_control/IMBControl
+* ARVA measurement conditioning unit: https://github.com/casy-lab/sitl_gazebo/blob/7d7b4af2a106626ff2d1b6bf38c0151bb2c50f04/src/gazebo_arva_plugin.cpp
 
 ## Authors
-  * Ilario Antonio Azzollini - Phd Student
+  * Ilario Antonio Azzollini - PhD Student
     * Email: ilario.azzollini@unibo.it
   * Nicola Mimmo - Junior Assistant Professor
     * Email: nicola.mimmmo2@unibo.it
-  * Lorenzo Gentilini - Phd Student
+  * Lorenzo Gentilini - PhD Student
     * Email: lorenzo.gentilini6@unibo.it
   * Lorenzo Marconi - Full Professor
     * Email: lorenzo.marconi@unibo.it
@@ -20,7 +19,7 @@ ARVA measurement conditioning unit: https://github.com/casy-lab/sitl_gazebo/blob
 ## References
 For the details of the work, please refer to the papers:
 * [1] I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([Paper](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt)).
-* [2] I.A. Azzollini, N. Mimmo, L. Gentilini, and L. Marconi. **UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach**. arXiv preprint arXiv:2106.14514, 2021. ([Paper](https://arxiv.org/abs/2106.14514), [BibTex](https://scholar.googleusercontent.com/scholar.bib?q=info:nl-Ic2TeHd4J:scholar.google.com/&output=citation&scisdr=CgUWVLF-EImTnBmpeW0:AAGBfm0AAAAAYO2sYW0PFzAR6L4y8TBv507lhvWnviZJ&scisig=AAGBfm0AAAAAYO2sYa4QvQVC1iLJyL642Lyuxbn0czak&scisf=4&ct=citation&cd=-1&hl=it&scfhb=1)).
+* [2] I.A. Azzollini, N. Mimmo, L. Gentilini, and L. Marconi. **UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach**. arXiv preprint arXiv:2106.14514, 2021. ([Paper](https://arxiv.org/abs/2106.14514), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt).
 
 In particular, this repository contains the code related to the complete solution presented in [2], which is an extension of [1].
 
