@@ -1,0 +1,6 @@
+@article{azzollini2021uav,
+  title={UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach},
+  author={Azzollini, Ilario Antonio and Mimmo, Nicola and Gentilini, Lorenzo and Marconi, Lorenzo},
+  journal={arXiv preprint arXiv:2106.14514},
+  year={2021}
+}
