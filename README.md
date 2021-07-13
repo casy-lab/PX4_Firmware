@@ -1,12 +1,11 @@
-# PX4 Firmware - IMB & ARVA Sensor Extension
-This GitHub repository provides a modified version of the PX4 autopilot which implements a new Internal Model Based (IMB) position controller able to provide null regime tracking errors under periodic excitations. Moreover a new Gazebo plugin has been implemented to simulate the behaviour of an ARVA transceiver systems, and an Extremum Seeking module is used to produce harmonic position trajectories useful to maximize the ARVA function, thus to find out the trasmitter.
+# PX4 Firmware Extension for "UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach"
+In the context of the european project [AirBorne](https://www.airborne-project.eu/), this work deals with the problem of localizing a victim buried by an avalanche by means of a drone equipped with an ARVA (Appareil de Recherche de Victimes d'Avalanche) sensor. The proposed control solution is based on three main units: the ARVA measurement conditioning unit, the Extremum Seeking (ES)-based reference position generator unit, and the Internal Model-Based (IMB) low-level position control unit. This control strategy is shown to succeed in steering the drone in a neighborhood of the victim position. The effectiveness and robustness of the proposed algorithm has been tested by using the code provided in this repo. In particular, a modified version of the PX4 autopilot implementing the aforementioned ES unit and IMB unit has been developed. Moreover, a new Gazebo plugin has been implemented to simulate the behavior of the ARVA unit.
 
-## Internal Model Based Regulator
-*Results of the software in the loop simulation.*
-<img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/sitl.png" width = 100% height = 50% />
+ES reference position generator unit: https://github.com/casy-lab/PX4_Firmware/tree/branch/airborne/src/modules/extremum_seeking
 
-*Results of the hardware in the loop simulation.*
-<img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/hitl.png" width = 100% height = 50% />
+IMB low-level control unit: https://github.com/casy-lab/PX4_Firmware/tree/branch/airborne/src/modules/mc_att_control/IMBControl
+
+ARVA measurement conditioning unit: https://github.com/casy-lab/sitl_gazebo/blob/7d7b4af2a106626ff2d1b6bf38c0151bb2c50f04/src/gazebo_arva_plugin.cpp
 
 ## Authors
   * Ilario Antonio Azzollini - Phd Student
@@ -19,9 +18,18 @@ This GitHub repository provides a modified version of the PX4 autopilot which im
     * Email: lorenzo.marconi@unibo.it
 
 ## References
-*If you use the ARVA plugin or this IMB regulator for your academic research, please cite our related papers.*
-* I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([PDF](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt)).
-* **Paper Title**, Authors, Conference/Journal/Date ([PDF](link to pdf), [BibTex](link to bib)).
+For the details of the work, please refer to the papers:
+* [1] I.A. Azzollini, N. Mimmo, and L. Marconi. **An Extremum Seeking Approach to Search and Rescue Operations in Avalanches using ARVA**. IFAC-PapersOnLine, 53(2):1627-1632, 2020. 21th IFAC World Congress. ([Paper](https://www.sciencedirect.com/science/article/abs/pii/S2405896320328706), [BibTex](https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/bib_ifac.txt)).
+* [2] I.A. Azzollini, N. Mimmo, L. Gentilini, and L. Marconi. **UAV-Based Search and Rescue in Avalanches using ARVA: An Extremum Seeking Approach**. arXiv preprint arXiv:2106.14514, 2021. ([Paper](https://arxiv.org/abs/2106.14514), [BibTex](https://scholar.googleusercontent.com/scholar.bib?q=info:nl-Ic2TeHd4J:scholar.google.com/&output=citation&scisdr=CgUWVLF-EImTnBmpeW0:AAGBfm0AAAAAYO2sYW0PFzAR6L4y8TBv507lhvWnviZJ&scisig=AAGBfm0AAAAAYO2sYa4QvQVC1iLJyL642Lyuxbn0czak&scisf=4&ct=citation&cd=-1&hl=it&scfhb=1)).
+
+In particular, this repository contains the code related to the complete solution presented in [2], which is an extension of [1].
+
+## Results (see reference [2])
+*Results of the software-in-the-loop simulation.*
+<img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/sitl.png" width = 100% height = 50% />
+
+*Results of the hardware-in-the-loop simulation.*
+<img src="https://github.com/casy-lab/PX4_Firmware/blob/branch/airborne/support_files/hitl.png" width = 100% height = 50% />
 
 ## 1. System Prerequisites
 ### 1.1 Ubuntu and ROS
@@ -53,40 +61,36 @@ Clone the code from GitHub repository:
 ```
 git clone https://github.com/casy-lab/PX4_Firmware --recursive
 ```
-Then build the code in simulation mode by running:
+Then build the code in Software-In-The-Loop (SITL) simulation mode by running:
 ```
-cd ab_es_proj_firmware
 DONT_RUN=1 make px4_sitl_default gazebo
 ```
 If you want build the code for a specific platform, run:
 ```
-cd ab_es_proj_firmware
 DONT_RUN=1 make px4_fmu-v*Your_Specific_Platform*_default
 ```
-Currently IBM regulator and Extremum Seeking module are available in simulation and for Pixhawk Cube:
+In particular, at the moment, the IMB regulator and ES modules are available in Hardware-In-The-Loop (HITL) simulation for the Pixhawk Cube board, so we can build the code by:
 ```
-cd ab_es_proj_firmware
 DONT_RUN=1 make px4_fmu-v3_default
 ```
-To run the autopilot in simulation mode, without ROS interface, type:
+To run the autopilot in SITL simulation mode, without ROS interface, type:
 ```
-cd ab_es_proj_firmware
 make px4_sitl gazebo_iris
 ```
-These command will launch a Gazebo simulation by spawning an Iris drone model at coordinates: 
+Those commands will launch a Gazebo simulation by spawning an Iris drone model at coordinates: 
 ```
 X = -49.0 m
 Y = -49.0 m
 Z =  0.0 m
 ```
 The spawned Iris drone is already endowed with the ARVA receiver.
-The Gazebo world is shaped to mimic an avalanche scenario, and an ARVA transmitter is located at coordinates:
+The Gazebo world is shaped to mimic an avalanche scenario, and the ARVA transmitter (victim) is located at coordinates:
 ```
 X = -15.0 m
 Y = -25.0 m
 Z =  17.0 m
 ```
-and with rotations:
+and with orientation wrt the inertial frame given by (see [2] for the notation):
 ```
 Y = 10.0°
 R = 155.0°
@@ -94,19 +98,19 @@ P = 0.0°
 ```
 
 ## 3. Extremum Seeking Example
-In order to execute the search mission, in SITL mode, once the simulation has been launched, run (on px4 console):
+In order to execute the search mission, in SITL mode, once the simulation has been launched, run (on PX4 console):
 ```
 extremum_seeking start
 commander mode search
 ```
-The drone then starts to search the ARVA transmitter by following setpoints provided by the Bounded Update Rate algorithm.
+The drone then starts to search the ARVA transmitter by following setpoints provided by the ES unit.
 
-In order to change the transmitter position or orientation, one can modify the header file *Tools/sitl_gazebo/include/gazebo_arva_plugin.h*.
-While to change the drone initial position, please check out the file *Tools/sitl_gazebo/worlds/iris.world*.
+In order to change the transmitter-victim position or orientation, one can modify the header file *Tools/sitl_gazebo/include/gazebo_arva_plugin.h*.
+While, to change the drone initial position, please check out the file *Tools/sitl_gazebo/worlds/iris.world*.
 
-## 4. Hardware in the Loop Simulation
-Currently the IBM Regulator and the Extremum Seeking module are implemented just for Pixhawk Cube board.
-In order to test the algorithm with HITL simulations, first set to *true* the flags *serial_enabled* and *hil_mode* in the file *Tools/sitl_gazebo/models/rotors_description/urdf/iris_base.xacro*. Then, connect the Pixhawk Cube board via USB plug and execute the following commands:
+## 4. HITL Simulation
+Currently, the IMB Regulator and the ES module are implemented only for the Pixhawk Cube board.
+In order to test the algorithm in an HITL simulation, first set to *true* the flags *serial_enabled* and *hil_mode* in the file *Tools/sitl_gazebo/models/rotors_description/urdf/iris_base.xacro*. Then, connect the Pixhawk Cube board via USB and execute the following commands:
 ```
 cd ab_es_proj_firmware
 make px4_fmu-v3_default upload
